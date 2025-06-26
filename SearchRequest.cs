@@ -1,4 +1,4 @@
-﻿using ObservableCollection;
+using ObservableCollection;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,10 +7,12 @@ namespace eBayKleinanzeigenTracker
 {
     public class SearchRequest : ViewModelBase
     {
-
         private string searchKey = "", priceMin = "", priceMax = "", results = "";
         private List<long> newestIds = new List<long>();
         private DateTime lastUpdate = DateTime.MinValue;
+
+        // NEU: Letzte Angebotsliste für Entfernen-Tracking
+        public List<Offer> LastOffers { get; set; } = new List<Offer>();
 
         public SearchRequest() { }
 
