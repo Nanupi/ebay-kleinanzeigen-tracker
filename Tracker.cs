@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Web;
@@ -35,7 +35,8 @@ namespace eBayKleinanzeigenTracker
                 try
                 {
                     Thread.Sleep(intervalSec * 1000);
-                } catch(ThreadInterruptedException e)
+                }
+                catch (ThreadInterruptedException e)
                 {
                     return;
                 }
@@ -62,6 +63,21 @@ namespace eBayKleinanzeigenTracker
                 string[] htmlParts = GetOfferStrings(webData);
                 List<Offer> offers = ExtractOffers(htmlParts);
 
+                // --- NEU: Entfernte Angebote erkennen ---
+                if (searchRequest.LastOffers != null && searchRequest.LastOffers.Count > 0)
+                {
+                    var removedOffers = searchRequest.LastOffers.FindAll(
+                        oldOffer => !offers.Exists(newOffer => newOffer.Id == oldOffer.Id)
+                    );
+
+                    foreach (var removed in removedOffers)
+                    {
+                        removed.RemovedDate = DateTime.Now;
+                        Console.WriteLine($"Angebot entfernt: {removed.Title} am {removed.RemovedDate}");
+                    }
+                }
+                // --- ENDE NEU ---
+
                 if (searchRequest.NewestIds.Count > 0)
                 {
                     List<Offer> newOffers = new List<Offer>();
@@ -86,7 +102,12 @@ namespace eBayKleinanzeigenTracker
 
                 searchRequest.Results = offers.Count >= 25 ? ">25" : offers.Count.ToString();
                 searchRequest.UpdateDateTime();
-            } catch (Exception e)
+
+                // --- NEU: Aktuelle Angebote als neuen Stand speichern ---
+                searchRequest.LastOffers = offers;
+                // --- ENDE NEU ---
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
@@ -100,7 +121,8 @@ namespace eBayKleinanzeigenTracker
                 Offer offer = newOffers[0];
                 _urlLatest = offer.Url;
                 _minimizeToTrayInstance.ShowBalloonTip(offer.Title, $"Preis: {offer.Price}\n{offer.Description}");
-            } else if (n > 1 && n < 25)
+            }
+            else if (n > 1 && n < 25)
             {
                 string searchKey = searchRequest.SearchKey;
                 _urlLatest = GetSearchUrl(searchRequest);
@@ -117,7 +139,7 @@ namespace eBayKleinanzeigenTracker
         {
             List<Offer> offers = new List<Offer>();
 
-            foreach(string code in codeParts)
+            foreach (string code in codeParts)
             {
                 string[] urlTitle = StringTools.ExtractGroups(code, " href=\"", "</a>")[0].Replace("\">", ">").Split('>');
 
