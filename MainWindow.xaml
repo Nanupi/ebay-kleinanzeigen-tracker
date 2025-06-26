@@ -52,6 +52,8 @@
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
 
+                        <DataGridTextColumn Header="Entfernt am" Binding="{Binding RemovedDate, StringFormat=\{0:dd.MM.yyyy HH:mm\}}" IsReadOnly="True" Width="150" />
+
                         <DataGridTemplateColumn Header="Mindestpreis" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
